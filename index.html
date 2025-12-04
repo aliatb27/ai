@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shiea Ai - المساعد الذكي للمعرفة الشيعية</title>
+    <title>Shiea Ai - المساعد الذكي المختص بنهج أهل البيت (ع)</title>
     <!-- Markdown Parser for AI responses -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
@@ -442,7 +441,8 @@
                 <div class="logo-large">ع</div>
                 <h1 style="margin-bottom: 20px;">Shiea Ai</h1>
                 <p style="max-width: 500px; margin-bottom: 20px; color: var(--text-secondary);">
-                    نظام ذكاء اصطناعي متطور يستند إلى المصادر الشيعية المعتبرة للإجابة على الأسئلة العقائدية، الفقهية، والتاريخية بدقة وتوثيق.
+                    نظام ذكاء اصطناعي مخصص <strong>حصرياً</strong> للإجابة وفقاً لمنهج أهل البيت (ع).<br>
+                    أي أسئلة خارج نطاق الدين، العقيدة الشيعية، أو التاريخ الإسلامي لن يتم الإجابة عليها.
                 </p>
                 
                 <div class="suggestions">
@@ -465,13 +465,13 @@
         <!-- Input Area -->
         <div class="input-area-wrapper">
             <div class="input-container">
-                <textarea id="userInput" rows="1" placeholder="اسأل عن التراث، العقائد، أو التاريخ..." oninput="autoResize(this)" onkeydown="handleEnter(event)"></textarea>
+                <textarea id="userInput" rows="1" placeholder="اسأل عن تراث أهل البيت (ع)..." oninput="autoResize(this)" onkeydown="handleEnter(event)"></textarea>
                 <button class="send-btn" id="sendBtn" onclick="sendMessage()">
                     <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="16" width="16" xmlns="http://www.w3.org/2000/svg"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
                 </button>
             </div>
             <div class="footer-text">
-                Shiea Ai يعتمد على الذكاء الاصطناعي وقد يخطئ. يرجى مراجعة المصادر الأصلية دائماً.
+                Shiea Ai مخصص لعلوم أهل البيت فقط. تحقق من المصادر الأصلية دائماً.
             </div>
         </div>
     </div>
@@ -483,16 +483,24 @@
         const sidebar = document.getElementById('sidebar');
         const sendBtn = document.getElementById('sendBtn');
 
-        // Initial System Prompt to define the AI Persona
+        // STRICT System Prompt to define the AI Persona and Limitations
         const SYSTEM_PROMPT = `
-        أنت "Shiea Ai"، مساعد ذكاء اصطناعي متخصص في علوم ومعارف الشيعة الإمامية الاثني عشرية.
-        مهامك هي:
-        1. الإجابة على الأسئلة العقائدية، الفقهية، التاريخية، والأخلاقية.
-        2. الاستناد في إجاباتك إلى المصادر الشيعية المعتبرة (القرآن الكريم، نهج البلاغة، الكتب الأربعة: الكافي، من لا يحضره الفقيه، التهذيب، الاستبصار).
-        3. ذكر المصادر والمراجع (اسم الكتاب، رقم الحديث إن وجد) كلما أمكن ذلك بدقة.
-        4. التحدث بلغة عربية فصحى، رصينة، ومهذبة تليق بمقام أهل البيت (ع).
-        5. إذا كان السؤال فقهياً بحتاً، اذكر الآراء المشهورة وانصح السائل بالرجوع لمرجعه الديني.
-        6. تجنب إثارة الفتنة، وركز على المشتركات ونشر علوم أهل البيت بأسلوب علمي وحكيم.
+        تعليمات صارمة للنظام "Shiea Ai":
+        أنت مساعد ذكاء اصطناعي متخصص حصرياً في علوم ومعارف الطائفة الشيعية الإمامية الاثني عشرية (مدرسة أهل البيت عليهم السلام).
+
+        قواعدك التي لا يجوز تجاوزها هي:
+        1. نطاق العمل: مسموح لك فقط بالإجابة على الأسئلة المتعلقة بـ: العقائد الشيعية، الفقه الشيعي، سيرة أهل البيت، التاريخ الإسلامي من منظور شيعي، تفسير القرآن (تفسير روائي)، والأخلاق الإسلامية.
+        
+        2. المصادر: استند في إجاباتك حصراً إلى المصادر الشيعية المعتبرة (القرآن الكريم، نهج البلاغة، الصحيفة السجادية، الكتب الأربعة: الكافي، من لا يحضره الفقيه، التهذيب، الاستبصار) وأقوال العلماء الشيعة.
+
+        3. الرفض القاطع: إذا سألك المستخدم أي سؤال خارج هذا الإطار (مثلاً: أسئلة عامة، تكنولوجيا، رياضة، طبخ، سياسة معاصرة غير مرتبطة بالدين، أو أسئلة عن مذاهب أخرى دون سياق مقارن علمي)، يجب عليك رفض الإجابة فوراً وكتابة الجملة التالية فقط دون أي زيادة:
+        "أنا مختص بمنهج أهل البيت (ع) فقط."
+
+        4. الأسلوب: تحدث بلغة عربية فصحى، رصينة، ومهذبة تليق بمقام أهل البيت (ع).
+
+        5. الفقه: في المسائل الفقهية، اذكر الآراء المشهورة وانصح السائل بالرجوع لمرجعه الديني لبرائة الذمة.
+        
+        تذكر: لا تجب على أي موضوع دنيوي بحت أو ترفيهي. هدفك نشر علوم آل محمد فقط.
         `;
 
         // Store conversation history
@@ -553,7 +561,7 @@
 
             try {
                 // Call Free AI Provider (Pollinations.ai)
-                // This acts as a proxy to OpenAI models without needing a backend or key in client code
+                // Sending the strict system prompt along with history
                 const response = await fetch('https://text.pollinations.ai/', {
                     method: 'POST',
                     headers: {
@@ -561,8 +569,8 @@
                     },
                     body: JSON.stringify({
                         messages: conversationHistory,
-                        model: 'openai', // Utilizes GPT-4o-mini or similar capabilities
-                        seed: Math.floor(Math.random() * 1000) // Randomness
+                        model: 'openai', // Utilizes general LLM which we are constraining via system prompt
+                        seed: Math.floor(Math.random() * 1000)
                     })
                 });
 
