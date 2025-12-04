@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shiea Ai - المساعد الذكي للمعرفة الشيعية</title>
+    <style>
+        /* Import Arabic Font */
+        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
+
+        :root {
+            --sidebar-bg: #202123;
+            --main-bg: #343541;
+            --user-msg-bg: #343541;
+            --ai-msg-bg: #444654;
+            --text-primary: #ECECF1;
+            --text-secondary: #C5C5D2;
+            --input-bg: #40414F;
+            --border-color: #2A2B32;
+            --accent-color: #10a37f; /* ChatGPT Green */
+            --shiea-accent: #00897B; /* Teal/Green variant for Shiea Ai identity */
+            --scroll-thumb: #565869;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--main-bg);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            transition: transform 0.3s ease;
+            position: relative;
+            z-index: 100;
+        }
+
+        .new-chat-btn {
+            border: 1px solid var(--border-color);
+            background: transparent;
+            color: var(--text-primary);
+            padding: 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: right;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            transition: background 0.2s;
+            margin-bottom: 20px;
+        }
+
+        .new-chat-btn:hover {
+            background-color: #2A2B32;
+        }
+
+        .history-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .history-item {
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-secondary);
+        }
+
+        .history-item:hover {
+            background-color: #2A2B32;
+        }
+
+        .user-menu {
+            border-top: 1px solid var(--border-color);
+            padding-top: 10px;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .user-menu:hover {
+            background-color: #2A2B32;
+        }
+
+        /* Main Chat Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background-color: var(--main-bg);
+        }
+
+        .mobile-header {
+            display: none;
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--main-bg);
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 150px;
+            scroll-behavior: smooth;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--scroll-thumb);
+            border-radius: 4px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .logo-large {
+            width: 80px;
+            height: 80px;
+            background-color: var(--shiea-accent);
+            border-radius: 50%;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(0, 137, 123, 0.3);
+        }
+
+        .suggestions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 40px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .suggestion-card {
+            background-color: #3E3F4B; /* Slightly lighter than input */
+            padding: 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 14px;
+            border: 1px solid transparent;
+        }
+
+        .suggestion-card:hover {
+            background-color: var(--input-bg);
+            border-color: var(--border-color);
+        }
+
+        /* Messages */
+        .message {
+            padding: 24px;
+            display: flex;
+            gap: 20px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .message.ai {
+            background-color: var(--ai-msg-bg);
+        }
+
+        .message.user {
+            background-color: var(--user-msg-bg);
+        }
+
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .avatar.ai {
+            background-color: var(--shiea-accent);
+        }
+
+        .avatar.user {
+            background-color: #5436DA;
+        }
+
+        .message-content {
+            line-height: 1.6;
+            font-size: 16px;
+            max-width: 800px;
+            flex: 1;
+        }
+        
+        /* Input Area */
+        .input-area-wrapper {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(180deg, rgba(53,53,65,0) 0%, var(--main-bg) 50%);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .input-container {
+            width: 100%;
+            max-width: 768px;
+            background-color: var(--input-bg);
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            border: 1px solid rgba(32,33,35,0.5);
+            display: flex;
+            align-items: flex-end;
+            padding: 10px 15px;
+            position: relative;
+        }
+
+        textarea {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: white;
+            resize: none;
+            max-height: 200px;
+            height: 24px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 16px;
+            outline: none;
+            padding: 0;
+            margin-left: 10px; /* Space for send button */
+            line-height: 24px;
+        }
+
+        .send-btn {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 5px;
+            border-radius: 5px;
+            transition: color 0.2s, background 0.2s;
+            position: absolute;
+            left: 10px; /* RTL specific */
+            bottom: 8px;
+        }
+
+        .send-btn:hover {
+            background-color: #202123;
+            color: var(--shiea-accent);
+        }
+
+        .footer-text {
+            color: #8e8ea0;
+            font-size: 12px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        /* Typing cursor effect */
+        .typing-indicator::after {
+            content: "▋";
+            display: inline-block;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                height: 100%;
+                right: -260px; /* Hide off-screen */
+            }
+            
+            .sidebar.active {
+                right: 0;
+                box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+            }
+
+            .mobile-header {
+                display: flex;
+            }
+
+            .input-area-wrapper {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <button class="new-chat-btn" onclick="resetChat()">
+            <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="16" width="16" xmlns="http://www.w3.org/2000/svg"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            محادثة جديدة
+        </button>
+
+        <div class="history-list">
+            <div class="history-item">سيرة الإمام علي (ع)</div>
+            <div class="history-item">شرح نهج البلاغة</div>
+            <div class="history-item">أحداث يوم الغدير</div>
+            <div class="history-item">زيارة عاشوراء</div>
+            <div class="history-item">منزلة أهل البيت</div>
+        </div>
+
+        <div class="user-menu">
+            <div class="avatar user" style="width: 30px; height: 30px; font-size: 12px;">مستخدم</div>
+            <span>المستخدم</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Mobile Header -->
+        <div class="mobile-header">
+            <span style="font-weight: bold;">Shiea Ai</span>
+            <button onclick="toggleSidebar()" style="background:none; border:none; color:white; cursor:pointer;">
+                <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="24" width="24" xmlns="http://www.w3.org/2000/svg"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-container" id="chatContainer">
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState">
+                <div class="logo-large">ع</div>
+                <h1 style="margin-bottom: 40px;">Shiea Ai</h1>
+                <p>مرحباً بك. أنا مساعد ذكاء اصطناعي متخصص في علوم ومعارف الشيعة.</p>
+                
+                <div class="suggestions">
+                    <div class="suggestion-card" onclick="setInput('ما هي مصادر التشريع عند الشيعة؟')">
+                        "ما هي مصادر التشريع عند الشيعة؟"
+                        <div style="color: #8e8ea0; margin-top:5px; font-size: 12px;">العقائد والفقه</div>
+                    </div>
+                    <div class="suggestion-card" onclick="setInput('حدثني عن واقعة الطف باختصار')">
+                        "حدثني عن واقعة الطف باختصار"
+                        <div style="color: #8e8ea0; margin-top:5px; font-size: 12px;">التاريخ الإسلامي</div>
+                    </div>
+                    <div class="suggestion-card" onclick="setInput('من هم الأئمة الاثنا عشر؟')">
+                        "من هم الأئمة الاثنا عشر؟"
+                        <div style="color: #8e8ea0; margin-top:5px; font-size: 12px;">السيرة والمعصومين</div>
+                    </div>
+                </div>
+            </div>
+            <!-- Messages will appear here -->
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area-wrapper">
+            <div class="input-container">
+                <textarea id="userInput" rows="1" placeholder="أرسل رسالة..." oninput="autoResize(this)" onkeydown="handleEnter(event)"></textarea>
+                <button class="send-btn" onclick="sendMessage()">
+                    <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="16" width="16" xmlns="http://www.w3.org/2000/svg"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
+            <div class="footer-text">
+                Shiea Ai قد ينتج معلومات غير دقيقة عن الأشخاص أو الأماكن أو الحقائق. إصدار 1.0
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Database of simulated responses for the demo
+        const knowledgeBase = {
+            default: "أنا نموذج ذكاء اصطناعي متخصص في التراث والمعارف الشيعية. يمكنك سؤالي عن العقائد، التاريخ، الفقه، أو سيرة أهل البيت (عليهم السلام).",
+            greetings: ["سلام", "مرحبا", "هلا"],
+            keywords: [
+                {
+                    keys: ["علي", "امير المؤمنين", "الامام علي"],
+                    response: "الإمام علي بن أبي طالب (عليه السلام) هو ابن عم الرسول (صلى الله عليه وآله) وصهره، وأول أئمة الشيعة. وُلد في جوف الكعبة، وهو باب مدينة علم الرسول، وقائد الغر المحجلين. يعتبره الشيعة الخليفة المباشر بعد النبي بنص حديث الغدير."
+                },
+                {
+                    keys: ["حسين", "الحسين", "كربلاء", "الطف", "عاشوراء"],
+                    response: "الإمام الحسين (عليه السلام) هو الإمام الثالث، سبط النبي وسيد شباب أهل الجنة. واقعة الطف في كربلاء عام 61 هـ تمثل قمة التضحية من أجل إصلاح الأمة ومقارعة الظلم. شعاره الخالد: 'هيهات منا الذلة'."
+                },
+                {
+                    keys: ["مهدي", "المنتظر", "الحجة", "القائم"],
+                    response: "الإمام المهدي (عجل الله تعالى فرجه الشريف) هو الإمام الثاني عشر. يعتقد الشيعة أنه حي يرزق ولكنه غائب عن الأنظار (الغيبة الكبرى) وسيظهر في آخر الزمان ليملأ الأرض قسطاً وعدلاً كما ملئت ظلماً وجوراً."
+                },
+                {
+                    keys: ["غدير", "خم", "ولاية"],
+                    response: "واقعة الغدير حدثت في 18 ذي الحجة في السنة العاشرة للهجرة، حيث خطب النبي (ص) في غدير خم وقال: 'من كنت مولاه فهذا علي مولاه'، وهو النص الصريح عند الشيعة على خلافة الإمام علي (ع)."
+                },
+                {
+                    keys: ["ائمة", "اثنا عشر", "الأئمة"],
+                    response: "الأئمة الاثنا عشر عند الشيعة هم خلفاء النبي (ص) وأوصياؤه، وهم: علي، الحسن، الحسين، علي السجاد، محمد الباقر، جعفر الصادق، موسى الكاظم، علي الرضا، محمد الجواد، علي الهادي، الحسن العسكري، ومحمد المهدي (عليهم السلام)."
+                },
+                {
+                    keys: ["شيعة", "تشيع"],
+                    response: "الشيعة هم أتباع مدرسة أهل البيت (عليهم السلام)، الذين يوالون علياً (ع) ويرون أحقيته بالخلافة بعد رسول الله (ص) مباشرة، ويأخذون معالم دينهم من القرآن الكريم والعترة الطاهرة."
+                }
+            ]
+        };
+
+        const chatContainer = document.getElementById('chatContainer');
+        const userInput = document.getElementById('userInput');
+        const emptyState = document.getElementById('emptyState');
+        const sidebar = document.getElementById('sidebar');
+
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+            if(textarea.value === '') textarea.style.height = '24px';
+        }
+
+        function setInput(text) {
+            userInput.value = text;
+            autoResize(userInput);
+            sendMessage();
+        }
+
+        function handleEnter(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('active');
+        }
+
+        function resetChat() {
+            chatContainer.innerHTML = '';
+            chatContainer.appendChild(emptyState);
+            emptyState.style.display = 'flex';
+            if(window.innerWidth <= 768) sidebar.classList.remove('active');
+        }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // Hide empty state
+            emptyState.style.display = 'none';
+
+            // Add User Message
+            appendMessage('user', text);
+            userInput.value = '';
+            userInput.style.height = '24px';
+
+            // Process Response (Simulated AI)
+            const aiResponse = generateResponse(text);
+
+            // Simulate typing delay
+            const loadingId = appendLoading();
+            await new Promise(r => setTimeout(r, 1000 + Math.random() * 1000));
+            
+            removeLoading(loadingId);
+            appendMessage('ai', aiResponse);
+        }
+
+        function generateResponse(input) {
+            const lowerInput = input.toLowerCase();
+            
+            // Check for greetings
+            if (knowledgeBase.greetings.some(g => lowerInput.includes(g))) {
+                return "أهلاً بك في Shiea Ai. كيف يمكنني مساعدتك في المسائل العقائدية أو التاريخية اليوم؟";
+            }
+
+            // Check keywords
+            for (let item of knowledgeBase.keywords) {
+                if (item.keys.some(key => lowerInput.includes(key))) {
+                    return item.response;
+                }
+            }
+
+            return knowledgeBase.default;
+        }
+
+        function appendMessage(sender, text) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${sender}`;
+            
+            let avatarHTML = '';
+            if (sender === 'ai') {
+                avatarHTML = `<div class="avatar ai"><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="18" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg></div>`;
+            } else {
+                avatarHTML = `<div class="avatar user"><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="18" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>`;
+            }
+
+            msgDiv.innerHTML = `
+                ${avatarHTML}
+                <div class="message-content">${text}</div>
+            `;
+            
+            chatContainer.appendChild(msgDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function appendLoading() {
+            const id = 'loading-' + Date.now();
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ai`;
+            msgDiv.id = id;
+            msgDiv.innerHTML = `
+                <div class="avatar ai"><svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" height="18" width="18" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg></div>
+                <div class="message-content typing-indicator"></div>
+            `;
+            chatContainer.appendChild(msgDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return id;
+        }
+
+        function removeLoading(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+    </script>
+</body>
+</html>
